@@ -40,8 +40,7 @@ GET /product/comments?url=<URL>&date_to=2024-02-08
 - `date_to` (str | None): Filter reviews up to date (YYYY-MM-DD). Default is None (no filter).
 
 ## Basic structure 🛠️
-- `app/api/`: API routes.
-- `app/core/`: Configuration and database connection.
+- `app/core/`: Configuration, database connection, logger, utils.
 - `app/models/`: Pydantic models (internal and external).
 - `app/services/`: Parsing logic.
 - `app/main.py`: Entry point of the application.
