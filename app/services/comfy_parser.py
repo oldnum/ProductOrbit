@@ -236,7 +236,8 @@ class ComfyParser:
                     rating=comment_data.rating,
                     advantages=comment_data.advantages,
                     shortcomings=comment_data.shortcomings,
-                    comment=comment_data.comment
+                    comment=comment_data.comment,
+                    created_at=comment_data.created_at
                 ) for _, comment_data in internal_data.comments.items()
             ]
         )

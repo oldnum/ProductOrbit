@@ -17,22 +17,22 @@ app = FastAPI(title=settings.PROJECT_NAME)
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    logger.info("⚪ [Main]: Application startup, connecting to MongoDB...")
+    logger.info("⚪ [APP]: Application startup, connecting to MongoDB...")
     try:
         await mongo_connect()
         if db_connection.db is None:
             raise RuntimeError("Database connection object is None after connect.")
-        logger.info("🟢 [Main]: Connected to MongoDB successfully.")
+        logger.info("🟢 [APP]: Connected to MongoDB successfully.")
     except Exception as e:
-        logger.critical("🔴 [Main]: Failed to connect to MongoDB: %s. Exiting.", e)
+        logger.critical("🔴 [APP]: Failed to connect to MongoDB: %s. Exiting.", e)
         sys.exit(1)
 
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("⚪ [Main]: Application shutdown, disconnecting from MongoDB...")
+    logger.info("⚪ [APP]: Application shutdown, disconnecting from MongoDB...")
     await mongo_disconnect()
-    logger.info("🟢 [Main]: Disconnected from MongoDB.")
+    logger.info("🟢 [APP]: Disconnected from MongoDB.")
 
 # API endpoint /product/offers
 @app.get("/product/offers")
@@ -42,7 +42,7 @@ async def get_product_offers(
     count_limit: int | None = Query(None, description="Limit number of offers. Maximum is 1000, minimum is 10, default is 10."),
     sort: str | None = Query(None, description="Sort order: 'asc' or 'desc'. Default is None (skip sort)."),
 ):
-    logger.info("⚪ [API]: Received request for %s", url)
+    logger.info("⚪ [APP]: Received request for %s", url)
     
     try:
         parser = ParserFactory.get_parser(url)
@@ -57,7 +57,7 @@ async def get_product_offers(
         return JSONResponse(status_code=200, content=external_data.model_dump(mode="json"))
     
     except Exception as e:
-        logger.error("🔴 [API]: Error processing request: %s", e)
+        logger.error("🔴 [APP]: Error processing request: %s", e)
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # API endpoint /product/comments
@@ -66,7 +66,7 @@ async def get_product_comments(
     url: str = Query(..., description="URL of the product (Comfy or Brain)"),
     date_to: Optional[str] = Query(None, description="Filter reviews up to date (YYYY-MM-DD)")
 ):
-    logger.info("⚪ [API]: Received comments request for %s", url)
+    logger.info("⚪ [APP]: Received comments request for %s", url)
     
     try:
         parser = ParserFactory.get_parser(url)
@@ -76,5 +76,5 @@ async def get_product_comments(
         return JSONResponse(status_code=200, content=external_data.model_dump(mode="json"))
 
     except Exception as e:
-        logger.error("🔴 [API]: Error processing comments request: %s", e)
+        logger.error("🔴 [APP]: Error processing comments request: %s", e)
         return JSONResponse(status_code=500, content={"error": str(e)})

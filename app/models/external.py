@@ -19,6 +19,7 @@ class CommentResponse(BaseModel):
     advantages: str = ""
     shortcomings: str = ""
     comment: str = ""
+    created_at: int
 
 class ProductCommentsResponse(BaseModel):
     url: str
