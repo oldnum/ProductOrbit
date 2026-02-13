@@ -29,15 +29,15 @@ The service will be available at `http://localhost:8000`.
 ```bash
 GET /product/offers?url=<URL>&timeout_limit=5&count_limit=10&sort=asc
 ```
-- `timeout_limit`: Timeout limit in seconds. Maximum is 60, minimum is 10, default is 60.
-- `count_limit`: Limit number of offers. Maximum is 1000, minimum is 10, default is 10.
-- `sort`: Sort order: 'asc' or 'desc'. Default is None (no sort).
+- `timeout_limit` (int): Timeout limit in seconds. Maximum is 60, minimum is 10. Default is 60.
+- `count_limit` (int): Limit number of offers. Maximum is 1000, minimum is 10. Default is 10.
+- `sort` (str | None): Sort order: 'asc' or 'desc'. Default is None (no sort).
 
 ### Get reviews from Comfy/Brain
 ```bash
 GET /product/comments?url=<URL>&date_to=2024-02-08
 ```
-- `date_to`: Filter reviews up to date (YYYY-MM-DD). Default is None (no filter).
+- `date_to` (str | None): Filter reviews up to date (YYYY-MM-DD). Default is None (no filter).
 
 ## Basic structure 🛠️
 - `app/api/`: API routes.

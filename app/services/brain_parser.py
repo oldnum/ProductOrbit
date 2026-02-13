@@ -8,12 +8,11 @@ from app.models.internal import BrainProductData, BrainCommentItem
 from app.models.external import ProductCommentsResponse, CommentResponse
 from app.core.database import db_connection, mongo_check
 from app.core.logger import logger
-from app.core.utils import validate_url, parse_date_to_ts, clean_text
+from app.core.utils import validate_url, parse_date_to_ts, clean_text, get_headers
 
 class BrainAPI:
     def __init__(self):
         self.default_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Referer": "https://brain.com.ua/"
         }
         self.default_api_url = "https://brain.com.ua/api/v1/product_comments/"
@@ -153,7 +152,7 @@ class BrainParser:
             
             return comment_id, comment_obj
 
-        async with aiohttp.ClientSession(headers=self.api.default_headers, timeout=self.api.default_timeout) as session:
+        async with aiohttp.ClientSession(headers=get_headers(self.api.default_headers), timeout=self.api.default_timeout) as session:
             html = await self.api.get_reviews_html(session, product_id)
             
             if not html:

@@ -2,22 +2,24 @@ import aiohttp
 import asyncio
 import re
 from datetime import datetime, timezone
+from playwright.async_api import async_playwright
+from playwright_stealth import Stealth
 
 from app.models.internal import ComfyProductData, ComfyCommentItem
 from app.models.external import ProductCommentsResponse, CommentResponse
 from app.core.database import db_connection, mongo_check
 from app.core.logger import logger
-from app.core.utils import validate_url, parse_date_to_ts, clean_text
+from app.core.utils import validate_url, parse_date_to_ts, clean_text, get_headers
 
 class ComfyAPI:
     def __init__(self):
         self.default_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Referer": "https://comfy.ua/",
             "Cookie": "g_state={}"
         }
         self.default_api_url = "https://im.comfy.ua/api/reviews/paged"
         self.default_timeout = aiohttp.ClientTimeout(total=10)
+        self.default_timeout_playwright = 5
         self.default_retries = 3
         self.default_delay = 0.3
     
@@ -27,11 +29,42 @@ class ComfyAPI:
 
         for attempt in range(1, self.default_retries + 1):
             try:
-                async with aiohttp.ClientSession(headers=self.default_headers, timeout=self.default_timeout) as session:
-                    async with session.get(url) as response:
-                        response.raise_for_status()
-                        logger.info("🟢 [ComfyAPI][get_page_content]: Fetched page %s", url)
-                        return await response.text()
+                headers = get_headers(self.default_headers)
+
+                async with async_playwright() as p:
+                    browser = await p.chromium.launch(
+                        headless=True, 
+                        args=[
+                            "--disable-blink-features=AutomationControlled",
+                            "--no-sandbox",
+                            "--disable-dev-shm-usage",
+                            "--disable-gpu",
+                            "--disable-infobars",
+                            "--disable-extensions"
+                        ], 
+                        slow_mo=0
+                    )
+
+                    context = await browser.new_context(
+                        user_agent=headers["User-Agent"],
+                        extra_http_headers=headers,
+                        viewport={"width": 1920, "height": 1080},
+                        locale="uk-UA"
+                    )
+
+                    page = await context.new_page()
+                    stealth = Stealth()
+                    await stealth.apply_stealth_async(page)
+
+                    await page.route("**/*", lambda r: r.abort() if r.request.resource_type in ["image", "font", "media", "stylesheet"] else r.continue_())
+                    await page.goto(url, wait_until="domcontentloaded", timeout=self.default_timeout_playwright * 1000)
+
+                    html = await page.content()
+                    if "Pardon Our Interruption" in html:
+                        raise Exception("Page is blocked by Cloudflare")
+
+                    logger.info("🟢 [ComfyAPI][get_page_content]: Fetched page %s", url)
+                    return html
 
             except Exception as e:
                 logger.error("🔴 [ComfyAPI][get_page_content]: Failed to fetch page %s: %s, attempt %s", url, e, attempt)
@@ -164,7 +197,7 @@ class ComfyParser:
                 parsed_at=int(datetime.now(timezone.utc).timestamp())
             )
 
-        async with aiohttp.ClientSession(headers=self.api.default_headers, timeout=self.api.default_timeout) as session:
+        async with aiohttp.ClientSession(headers=get_headers(self.api.default_headers), timeout=self.api.default_timeout) as session:
             for page in range(1, page_size + 1):
                 raw_reviews = await self.api.get_reviews(
                     session=session,

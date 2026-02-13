@@ -9,12 +9,11 @@ from app.models.internal import HotlineProductData, HotlineOfferItem
 from app.models.external import ProductOffersResponse, OfferResponse
 from app.core.database import db_connection, mongo_check
 from app.core.logger import logger
-from app.core.utils import validate_url, parse_date_to_ts
+from app.core.utils import validate_url, parse_date_to_ts, get_headers
 
 class HotlineAPI:
     def __init__(self):
         self.default_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
             "Referer": "https://hotline.ua/"
         }
         self.default_graphql_url = "https://hotline.ua/svc/frontend-api/graphql"
@@ -61,11 +60,11 @@ class HotlineAPI:
 
         for attempt in range(1, self.default_retries + 1):
             try:
-                async with session.head(url, headers=self.default_headers, allow_redirects=False) as r:
+                async with session.head(url, headers=get_headers(self.default_headers), allow_redirects=False) as r:
                     redirect_url = r.headers.get("Location")
 
                 if not redirect_url or redirect_url == url:
-                    async with session.get(url, headers=self.default_headers, allow_redirects=True) as r:
+                    async with session.get(url, headers=get_headers(self.default_headers), allow_redirects=True) as r:
                         redirect_url = str(r.url)
 
                 if redirect_url and redirect_url != url:
@@ -84,7 +83,7 @@ class HotlineAPI:
     async def fetch_page_json(self, url: str, additional_json: dict, additional_headers: dict = None):
         logger.info("⚪ [HotlineAPI][fetch_page_json]: Fetching page JSON for URL: %s.", url)
 
-        headers = self.default_headers.copy()   
+        headers = get_headers(self.default_headers)
         if additional_headers:
             headers.update(additional_headers)
 

@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import re
 import html
+from browserforge.headers import HeaderGenerator
 
 # Validate and normalize URL for a specific domain.
 LANG_PREFIXES = ["ua", "ukr", "en", "ru"]
@@ -56,3 +57,11 @@ def clean_text(text: str) -> str:
     if not text: return ""
     clean = re.sub(r'<[^>]+>', '', text)
     return html.unescape(clean).strip()
+
+# Get headers for a specific domain
+def get_headers(default_headers: dict[str, str] | None = None):
+    hg = HeaderGenerator()
+    headers = hg.generate()
+    if default_headers:
+        headers.update(default_headers)
+    return headers
