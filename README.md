@@ -29,8 +29,8 @@ The service will be available at `http://localhost:8000`.
 ```bash
 GET /product/offers?url=<URL>&timeout_limit=5&count_limit=10&sort=asc
 ```
-- `timeout_limit` (int): Timeout limit in seconds. Maximum is 60, minimum is 10. Default is 60.
-- `count_limit` (int): Limit number of offers. Maximum is 1000, minimum is 10. Default is 10.
+- `timeout_limit` (int | None): Timeout limit in seconds. Maximum is 60, minimum is 10. Default is 60.
+- `count_limit` (int | None): Limit number of offers. Maximum is 1000, minimum is 10. Default is 10.
 - `sort` (str | None): Sort order: 'asc' or 'desc'. Default is None (no sort).
 
 ### Get reviews from Comfy/Brain
