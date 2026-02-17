@@ -166,7 +166,7 @@ class ComfyParser:
             return ComfyProductData(url=url, comments={})
 
         comfy_comments = {}
-        page_size = int(reviews_total // 10)
+        page_size = (reviews_total + 9) // 10
         if page_size == 0: page_size = 1
 
         logger.info("🟢 [ComfyParser][parse]: Total reviews: %s, Total pages: %s", reviews_total, page_size)
