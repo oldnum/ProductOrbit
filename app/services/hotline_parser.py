@@ -25,7 +25,7 @@ class HotlineAPI:
         # Timeout limit validation
         if timeout_limit is None:
             timeout_limit = 60
-        elif timeout_limit.is_integer():
+        elif isinstance(timeout_limit, int):
             if timeout_limit > 60:
                 timeout_limit = 60
             elif timeout_limit < 1:
@@ -42,7 +42,7 @@ class HotlineAPI:
         # Count limit validation
         if count_limit is None:
             count_limit = 10
-        elif count_limit.is_integer():
+        elif isinstance(count_limit, int):
             if count_limit > 1000:
                 count_limit = 1000
             elif count_limit < 1:
